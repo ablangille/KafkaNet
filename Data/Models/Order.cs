@@ -1,4 +1,4 @@
-namespace Publisher.Models
+namespace Data.Models
 {
     public class Order
     {
@@ -6,6 +6,6 @@ namespace Publisher.Models
         public int ProductId { get; set; }
         public int CustomerId { get; set; }
         public int Quantity { get; set; }
-        public string? Status { get; set; }
+        public string Status { get; set; }
     }
 }

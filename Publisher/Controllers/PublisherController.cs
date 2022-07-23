@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Confluent.Kafka;
-using Publisher.Models;
+using Data.Models;
 using System.Text.Json;
 using System.Net;
 
@@ -30,11 +30,18 @@ namespace Publisher.Controllers
                     ProductId = orderRequest.ProductId,
                     CustomerId = orderRequest.CustomerId,
                     Quantity = orderRequest.Quantity,
-                    Status = orderRequest.Status
+                    Status = "Sent"
                 }
             );
 
-            return Ok(await SendOrderRequest(_topic, message));
+            if (await SendOrderRequest(_topic, message))
+            {
+                return Ok(JsonSerializer.Deserialize<Order>(message));
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
+            }
         }
 
         private async Task<bool> SendOrderRequest(string topic, string message)

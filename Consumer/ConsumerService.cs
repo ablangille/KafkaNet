@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using System.Text.Json;
+using Data.Models;
 
 namespace Consumer
 {
@@ -43,7 +44,7 @@ namespace Consumer
                 }
                 catch (OperationCanceledException ex)
                 {
-                    _logger.LogError(ex, $"Error occurred: {ex.Message}");
+                    _logger.LogInformation(ex, $"Error occurred: {ex.Message}");
                 }
 
                 consumerBuilder.Close();
