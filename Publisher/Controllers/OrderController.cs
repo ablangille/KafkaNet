@@ -6,15 +6,15 @@ using System.Net;
 
 namespace KafkaDocker.Publisher.Controllers
 {
-    [Route("api/publisher")]
+    [Route("api/order")]
     [ApiController]
-    public class PublisherController : ControllerBase
+    public class OrderController : ControllerBase
     {
         private readonly string _bootstrapServers = "localhost:9092";
         private readonly string _topic = "test";
-        private readonly ILogger<PublisherController> _logger;
+        private readonly ILogger<OrderController> _logger;
 
-        public PublisherController(ILogger<PublisherController> logger)
+        public OrderController(ILogger<OrderController> logger)
         {
             _logger = logger;
         }
