@@ -19,7 +19,6 @@ namespace KafkaDocker.Publisher.Controllers
             _logger = logger;
         }
 
-        [Route("send")]
         [HttpPost]
         public async Task<IActionResult> SendOrderRequest(OrderRequest orderRequest)
         {
@@ -61,12 +60,14 @@ namespace KafkaDocker.Publisher.Controllers
                         new Message<Null, string> { Value = message }
                     );
 
-                    _logger.LogInformation($"Delivery Timestamp: {result.Timestamp.UtcDateTime}");
+                    _logger.LogInformation(
+                        $"Info: Delivery Timestamp: {result.Timestamp.UtcDateTime}"
+                    );
                 }
 
                 return await Task.FromResult(true);
             }
-            catch (KafkaException ex)
+            catch (ProduceException<Null, string> ex)
             {
                 _logger.LogError(ex, $"Error occurred: {ex.Message}");
             }

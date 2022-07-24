@@ -39,14 +39,12 @@ namespace KafkaDocker.Consumer
                     {
                         var consumer = consumerBuilder.Consume(cancellationToken);
                         var order = JsonSerializer.Deserialize<Order>(consumer.Message.Value);
-                        _logger.LogInformation($"Processing Order Id: {order?.Id}");
+                        _logger.LogInformation($"Info: Processing Order Id: {order?.Id}");
 
                         order.Status = "Confirmed";
 
                         using (var scope = _scopeFactory.CreateScope())
                         {
-                            var dbContext =
-                                scope.ServiceProvider.GetRequiredService<KafkaDockerDbContext>();
                             var orderRepository =
                                 scope.ServiceProvider.GetRequiredService<IOrderRepository>();
                             await Task.FromResult(orderRepository.AddOrder(order));
@@ -59,7 +57,7 @@ namespace KafkaDocker.Consumer
                 }
                 catch (OperationCanceledException ex)
                 {
-                    _logger.LogInformation(ex, $"Error occurred: {ex.Message}");
+                    _logger.LogInformation(ex, $"Info: {ex.Message}");
                 }
 
                 consumerBuilder.Close();
