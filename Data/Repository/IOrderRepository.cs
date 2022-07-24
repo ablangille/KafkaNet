@@ -1,6 +1,6 @@
-using Data.Models;
+using KafkaDocker.Data.Models;
 
-namespace Data.Repository
+namespace KafkaDocker.Data.Repository
 {
     public interface IOrderRepository
     {

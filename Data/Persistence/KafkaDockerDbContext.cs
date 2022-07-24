@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Data.Models;
+using KafkaDocker.Data.Models;
 
-namespace Data.Persistence
+namespace KafkaDocker.Data.Persistence
 {
     public class KafkaDockerDbContext : DbContext
     {

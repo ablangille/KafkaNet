@@ -1,4 +1,4 @@
-namespace Data.Models
+namespace KafkaDocker.Data.Models
 {
     public class Order
     {

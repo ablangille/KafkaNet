@@ -1,22 +1,26 @@
 using Confluent.Kafka;
 using System.Text.Json;
-using Data.Models;
+using KafkaDocker.Data.Models;
+using KafkaDocker.Data.Repository;
+using KafkaDocker.Data.Persistence;
 
-namespace Consumer
+namespace KafkaDocker.Consumer
 {
     public class ConsumerService : BackgroundService
     {
         private readonly string _topic = "test";
         private readonly string _groupId = "test_group";
         private readonly string _bootstrapServers = "localhost:9092";
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<ConsumerService> _logger;
 
-        public ConsumerService(ILogger<ConsumerService> logger)
+        public ConsumerService(ILogger<ConsumerService> logger, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
+            _scopeFactory = scopeFactory;
         }
 
-        protected override Task ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             var config = new ConsumerConfig
             {
@@ -36,6 +40,17 @@ namespace Consumer
                         var consumer = consumerBuilder.Consume(cancellationToken);
                         var order = JsonSerializer.Deserialize<Order>(consumer.Message.Value);
                         _logger.LogInformation($"Processing Order Id: {order?.Id}");
+
+                        order.Status = "Confirmed";
+
+                        using (var scope = _scopeFactory.CreateScope())
+                        {
+                            var dbContext =
+                                scope.ServiceProvider.GetRequiredService<KafkaDockerDbContext>();
+                            var orderRepository =
+                                scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+                            await Task.FromResult(orderRepository.AddOrder(order));
+                        }
                     }
                 }
                 catch (ConsumeException ex)
@@ -49,8 +64,6 @@ namespace Consumer
 
                 consumerBuilder.Close();
             }
-
-            return Task.CompletedTask;
         }
     }
 }

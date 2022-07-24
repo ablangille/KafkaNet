@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Confluent.Kafka;
-using Data.Models;
+using KafkaDocker.Data.Models;
 using System.Text.Json;
 using System.Net;
 
-namespace Publisher.Controllers
+namespace KafkaDocker.Publisher.Controllers
 {
     [Route("api/publisher")]
     [ApiController]

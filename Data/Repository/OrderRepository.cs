@@ -1,8 +1,8 @@
-using Data.Models;
-using Data.Persistence;
+using KafkaDocker.Data.Models;
+using KafkaDocker.Data.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Repository
+namespace KafkaDocker.Data.Repository
 {
     public class OrderRepository : IOrderRepository
     {
