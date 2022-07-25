@@ -57,6 +57,7 @@ namespace KafkaDocker.Publisher.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, $"Error occurred: {ex.Message}");
                 return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
             }
         }

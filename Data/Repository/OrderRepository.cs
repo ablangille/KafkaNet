@@ -6,50 +6,58 @@ namespace KafkaDocker.Data.Repository
 {
     public class OrderRepository : IOrderRepository
     {
-        private readonly KafkaDockerDbContext _dbContext;
-
-        public OrderRepository(KafkaDockerDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public OrderRepository() { }
 
         public Order GetOrder(Guid id)
         {
-            return _dbContext.Orders.Find(id);
+            using (var context = new KafkaDockerDbContext())
+            {
+                return context.Orders.Find(id);
+            }
         }
 
         public IEnumerable<Order> GetOrders()
         {
-            return _dbContext.Orders.ToList();
+            using (var context = new KafkaDockerDbContext())
+            {
+                return context.Orders.ToList();
+            }
         }
 
         public Order AddOrder(Order order)
         {
-            _dbContext.Orders.Add(order);
-            _dbContext.SaveChanges();
-            return order;
+            using (var context = new KafkaDockerDbContext())
+            {
+                context.Orders.Add(order);
+                context.SaveChanges();
+                return order;
+            }
         }
 
         public Order UpdateOrder(Order order)
         {
-            _dbContext.Entry(order).State = EntityState.Modified;
-            _dbContext.SaveChanges();
-            return order;
+            using (var context = new KafkaDockerDbContext())
+            {
+                context.Entry(order).State = EntityState.Modified;
+                context.SaveChanges();
+                return order;
+            }
         }
 
         public Order DeleteOrder(Guid id)
         {
-            Order order = _dbContext.Orders.Find(id);
+            using (var context = new KafkaDockerDbContext())
+            {
+                Order order = context.Orders.Find(id);
 
-            if (order != null)
-            {
-                _dbContext.Orders.Remove(order);
-                _dbContext.SaveChanges();
+                if (order == null)
+                {
+                    return null;
+                }
+
+                context.Orders.Remove(order);
+                context.SaveChanges();
                 return order;
-            }
-            else
-            {
-                return null;
             }
         }
     }
