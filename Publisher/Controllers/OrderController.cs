@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Confluent.Kafka;
 using KafkaDocker.Data.Models;
-using System.Text.Json;
-using System.Net;
+using KafkaDocker.Data.Repository;
+using KafkaDocker.Publisher.Request;
 
 namespace KafkaDocker.Publisher.Controllers
 {
@@ -10,32 +9,36 @@ namespace KafkaDocker.Publisher.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly string _bootstrapServers = "localhost:9092";
-        private readonly string _topic = "test";
         private readonly ILogger<OrderController> _logger;
+        private readonly IOrderRequest _handler;
+        private readonly IOrderRepository _repository;
 
-        public OrderController(ILogger<OrderController> logger)
+        public OrderController(
+            ILogger<OrderController> logger,
+            IOrderRequest handler,
+            IOrderRepository repository
+        )
         {
             _logger = logger;
+            _handler = handler;
+            _repository = repository;
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendOrderRequest(OrderRequest orderRequest)
+        public async Task<ActionResult<Order>> SendOrder(OrderRequest orderRequest)
         {
-            string message = JsonSerializer.Serialize(
-                new Order
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = orderRequest.ProductId,
-                    CustomerId = orderRequest.CustomerId,
-                    Quantity = orderRequest.Quantity,
-                    Status = "Sent"
-                }
-            );
-
-            if (await SendOrderRequest(_topic, message))
+            var order = new Order
             {
-                return Ok(JsonSerializer.Deserialize<Order>(message));
+                Id = Guid.NewGuid(),
+                ProductId = orderRequest.ProductId,
+                CustomerId = orderRequest.CustomerId,
+                Quantity = orderRequest.Quantity,
+                Status = "Sent"
+            };
+
+            if (await _handler.SendOrderRequest(order))
+            {
+                return StatusCode(StatusCodes.Status201Created, order);
             }
             else
             {
@@ -43,44 +46,19 @@ namespace KafkaDocker.Publisher.Controllers
             }
         }
 
-        private async Task<bool> SendOrderRequest(string topic, string message)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Order>>> GetAllOrders()
         {
-            ProducerConfig config = new ProducerConfig
-            {
-                BootstrapServers = _bootstrapServers,
-                ClientId = Dns.GetHostName()
-            };
-
             try
             {
-                using (var producer = new ProducerBuilder<Null, string>(config).Build())
-                {
-                    var result = await producer.ProduceAsync(
-                        topic,
-                        new Message<Null, string> { Value = message }
-                    );
+                var users = await Task.FromResult(_repository.GetOrders());
 
-                    _logger.LogInformation(
-                        $"Info: Delivery Timestamp: {result.Timestamp.UtcDateTime}"
-                    );
-                }
-
-                return await Task.FromResult(true);
+                return Ok(users);
             }
-            catch (ProduceException<Null, string> ex)
+            catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, $"Error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
             }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, $"Error occurred: {ex.Message}");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return await Task.FromResult(false);
         }
     }
 }
