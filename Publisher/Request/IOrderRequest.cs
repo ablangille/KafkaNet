@@ -4,6 +4,6 @@ namespace KafkaDocker.Publisher.Request
 {
     public interface IOrderRequest
     {
-        public Task<bool> SendOrderRequest(Order order);
+        public Task<RequestResponse> SendOrderRequest(Order order);
     }
 }

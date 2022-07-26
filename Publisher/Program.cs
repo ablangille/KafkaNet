@@ -1,5 +1,6 @@
 using KafkaDocker.Data.Repository;
 using KafkaDocker.Publisher.Request;
+using KafkaDocker.Publisher.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IOrderRequest, OrderRequestHandler>();
+builder.Services.AddScoped<TopicCreator>();
 
 var app = builder.Build();
 

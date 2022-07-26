@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using KafkaDocker.Data.Models;
+using KafkaDocker.Publisher.Helpers;
 using System.Net;
 using System.Text.Json;
 
@@ -10,14 +11,29 @@ namespace KafkaDocker.Publisher.Request
         private readonly string _bootstrapServers = "localhost:9092";
         private readonly string _topic = "test";
         private readonly ILogger<OrderRequestHandler> _logger;
+        private readonly TopicCreator _topicCreator;
 
-        public OrderRequestHandler(ILogger<OrderRequestHandler> logger)
+        public OrderRequestHandler(ILogger<OrderRequestHandler> logger, TopicCreator topicCreator)
         {
             _logger = logger;
+            _topicCreator = topicCreator;
         }
 
-        public async Task<bool> SendOrderRequest(Order order)
+        public async Task<RequestResponse> SendOrderRequest(Order order)
         {
+            bool connected = await _topicCreator.CreateTopic(_topic, 1, 1, _bootstrapServers);
+
+            if (!connected)
+            {
+                return await Task.FromResult(
+                    new RequestResponse
+                    {
+                        Status = StatusCodes.Status503ServiceUnavailable,
+                        Message = "Connection failed"
+                    }
+                );
+            }
+
             string message = JsonSerializer.Serialize(order);
 
             ProducerConfig config = new ProducerConfig
@@ -26,9 +42,9 @@ namespace KafkaDocker.Publisher.Request
                 ClientId = Dns.GetHostName()
             };
 
-            try
+            using (var producer = new ProducerBuilder<Null, string>(config).Build())
             {
-                using (var producer = new ProducerBuilder<Null, string>(config).Build())
+                try
                 {
                     var result = await producer.ProduceAsync(
                         _topic,
@@ -39,19 +55,23 @@ namespace KafkaDocker.Publisher.Request
                         $"Info: Delivery Timestamp: {result.Timestamp.UtcDateTime}"
                     );
                 }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogError(ex, $"Error occurred: {ex.Message}");
+                    producer.AbortTransaction();
+                    return await Task.FromResult(
+                        new RequestResponse
+                        {
+                            Status = StatusCodes.Status400BadRequest,
+                            Message = $"{ex.Message}"
+                        }
+                    );
+                }
+            }
 
-                return await Task.FromResult(true);
-            }
-            catch (ProduceException<Null, string> ex)
-            {
-                _logger.LogError(ex, $"Error occurred: {ex.Message}");
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, $"Error occurred: {ex.Message}");
-            }
-
-            return await Task.FromResult(false);
+            return await Task.FromResult(
+                new RequestResponse { Status = StatusCodes.Status201Created }
+            );
         }
     }
 }

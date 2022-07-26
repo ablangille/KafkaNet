@@ -55,6 +55,10 @@ namespace KafkaDocker.Consumer
                 {
                     _logger.LogError(ex, $"Error occurred: {ex.Message}");
                 }
+                catch (KafkaException ex)
+                {
+                    _logger.LogError(ex, $"Error occurred: {ex.Message}");
+                }
                 catch (OperationCanceledException ex)
                 {
                     _logger.LogInformation(ex, $"Info: {ex.Message}");

@@ -36,14 +36,9 @@ namespace KafkaDocker.Publisher.Controllers
                 Status = "Sent"
             };
 
-            if (await _handler.SendOrderRequest(order))
-            {
-                return StatusCode(StatusCodes.Status201Created, order);
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
-            }
+            var response = await _handler.SendOrderRequest(order);
+
+            return StatusCode(response.Status, response.Message != null ? response.Message : order);
         }
 
         [HttpGet]
