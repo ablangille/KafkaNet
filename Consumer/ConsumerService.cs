@@ -2,7 +2,6 @@ using Confluent.Kafka;
 using System.Text.Json;
 using KafkaDocker.Data.Models;
 using KafkaDocker.Data.Repository;
-using KafkaDocker.Data.Persistence;
 
 namespace KafkaDocker.Consumer
 {
@@ -10,7 +9,7 @@ namespace KafkaDocker.Consumer
     {
         private readonly string _topic = "test";
         private readonly string _groupId = "test_group";
-        private readonly string _bootstrapServers = "localhost:9092";
+        private readonly string _bootstrapServers = Environment.GetEnvironmentVariable("BrokerUrl");
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<ConsumerService> _logger;
 
@@ -28,6 +27,8 @@ namespace KafkaDocker.Consumer
                 BootstrapServers = _bootstrapServers,
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
+
+            _logger.LogInformation($"Current bootstrap servers: {_bootstrapServers}");
 
             using (var consumerBuilder = new ConsumerBuilder<Ignore, string>(config).Build())
             {

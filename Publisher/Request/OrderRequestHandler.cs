@@ -8,7 +8,7 @@ namespace KafkaDocker.Publisher.Request
 {
     public class OrderRequestHandler : IOrderRequest
     {
-        private readonly string _bootstrapServers = "localhost:9092";
+        private readonly string _bootstrapServers = Environment.GetEnvironmentVariable("BrokerUrl");
         private readonly string _topic = "test";
         private readonly ILogger<OrderRequestHandler> _logger;
         private readonly TopicCreator _topicCreator;

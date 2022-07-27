@@ -52,3 +52,23 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: localhost:9092
       APPLICATION_ID: registry_id
       APPLICATION_SERVER: localhost:9000
+
+  publisher:
+    image: publisher
+    environment:
+      TestApi_ConnectionString: ${TestApi_ConnectionString}
+      BrokerUrl: kafka:29092
+    build:
+      context: .
+      dockerfile: Publisher/Dockerfile
+    ports:
+      - 8080:8080
+
+  consumer:
+    image: consumer
+    environment:
+      TestApi_ConnectionString: ${TestApi_ConnectionString}
+      BrokerUrl: kafka:29092
+    build:
+      context: .
+      dockerfile: Consumer/Dockerfile
