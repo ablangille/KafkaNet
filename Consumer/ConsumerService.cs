@@ -2,6 +2,7 @@ using Confluent.Kafka;
 using System.Text.Json;
 using KafkaDocker.Data.Models;
 using KafkaDocker.Data.Repository;
+using KafkaDocker.Data.Helpers;
 
 namespace KafkaDocker.Consumer
 {
@@ -30,6 +31,13 @@ namespace KafkaDocker.Consumer
 
             _logger.LogInformation($"Current bootstrap servers: {_bootstrapServers}");
 
+            using (var scopeTopic = _scopeFactory.CreateScope())
+            {
+                var kafkaConnection =
+                    scopeTopic.ServiceProvider.GetRequiredService<KafkaConnection>();
+                await kafkaConnection.CreateTopic(_topic, 1, 1);
+            }
+
             using (var consumerBuilder = new ConsumerBuilder<Ignore, string>(config).Build())
             {
                 consumerBuilder.Subscribe(_topic);
@@ -44,10 +52,10 @@ namespace KafkaDocker.Consumer
 
                         order.Status = "Confirmed";
 
-                        using (var scope = _scopeFactory.CreateScope())
+                        using (var scopeRepository = _scopeFactory.CreateScope())
                         {
                             var orderRepository =
-                                scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+                                scopeRepository.ServiceProvider.GetRequiredService<IOrderRepository>();
                             await Task.FromResult(orderRepository.AddOrder(order));
                         }
                     }

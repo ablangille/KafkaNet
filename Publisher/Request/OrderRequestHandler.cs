@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 using KafkaDocker.Data.Models;
-using KafkaDocker.Publisher.Helpers;
+using KafkaDocker.Data.Helpers;
 using System.Net;
 using System.Text.Json;
 
@@ -11,17 +11,20 @@ namespace KafkaDocker.Publisher.Request
         private readonly string _bootstrapServers = Environment.GetEnvironmentVariable("BrokerUrl");
         private readonly string _topic = "test";
         private readonly ILogger<OrderRequestHandler> _logger;
-        private readonly TopicCreator _topicCreator;
+        private readonly KafkaConnection _kafkaConnection;
 
-        public OrderRequestHandler(ILogger<OrderRequestHandler> logger, TopicCreator topicCreator)
+        public OrderRequestHandler(
+            ILogger<OrderRequestHandler> logger,
+            KafkaConnection kafkaConnection
+        )
         {
             _logger = logger;
-            _topicCreator = topicCreator;
+            _kafkaConnection = kafkaConnection;
         }
 
         public async Task<RequestResponse> SendOrderRequest(Order order)
         {
-            bool connected = await _topicCreator.CreateTopic(_topic, 1, 1, _bootstrapServers);
+            bool connected = await _kafkaConnection.CheckConnection();
 
             if (!connected)
             {

@@ -2,27 +2,19 @@ using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using System.Net;
 
-namespace KafkaDocker.Publisher.Helpers
+namespace KafkaDocker.Data.Helpers
 {
-    public class TopicCreator
+    public class KafkaConnection
     {
-        private readonly ILogger<TopicCreator> _logger;
+        private readonly string _bootstrapServers = Environment.GetEnvironmentVariable("BrokerUrl");
 
-        public TopicCreator(ILogger<TopicCreator> logger)
-        {
-            _logger = logger;
-        }
+        public KafkaConnection() { }
 
-        public async Task<bool> CreateTopic(
-            string name,
-            int numPartitions,
-            short replicationFactor,
-            string brokerUrl
-        )
+        public async Task<bool> CreateTopic(string name, int numPartitions, short replicationFactor)
         {
             ClientConfig config = new ClientConfig
             {
-                BootstrapServers = brokerUrl,
+                BootstrapServers = _bootstrapServers,
                 ClientId = Dns.GetHostName(),
                 SocketMaxFails = 1
             };
@@ -43,22 +35,31 @@ namespace KafkaDocker.Publisher.Helpers
                         }
                     );
                 }
-                catch (CreateTopicsException e)
+                catch (KafkaException)
                 {
-                    if (e.Results[0].Error.Code != ErrorCode.TopicAlreadyExists)
-                    {
-                        _logger.LogError(
-                            $"An error occured creating topic {name}: {e.Results[0].Error.Reason}"
-                        );
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Topic already exists");
-                    }
+                    return await Task.FromResult(false);
                 }
-                catch (KafkaException e)
+            }
+
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> CheckConnection()
+        {
+            ClientConfig config = new ClientConfig
+            {
+                BootstrapServers = _bootstrapServers,
+                ClientId = Dns.GetHostName()
+            };
+
+            using (var adminClient = new AdminClientBuilder(config).Build())
+            {
+                try
                 {
-                    _logger.LogError(e, $"Error occurred: {e.Message}");
+                    adminClient.GetMetadata(TimeSpan.FromSeconds(1));
+                }
+                catch (KafkaException)
+                {
                     return await Task.FromResult(false);
                 }
             }
