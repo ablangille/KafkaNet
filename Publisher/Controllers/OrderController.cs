@@ -25,6 +25,7 @@ namespace KafkaDocker.Publisher.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Order))]
         public async Task<ActionResult<Order>> SendOrder(OrderRequest orderRequest)
         {
             var order = new Order
@@ -42,6 +43,7 @@ namespace KafkaDocker.Publisher.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Order>))]
         public async Task<ActionResult<IEnumerable<Order>>> GetAllOrders()
         {
             try

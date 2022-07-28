@@ -1,4 +1,4 @@
-namespace KafkaDocker.Publisher.Request
+namespace KafkaDocker.Data.Models
 {
     public class RequestResponse
     {
