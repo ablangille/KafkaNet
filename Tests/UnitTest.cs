@@ -15,12 +15,9 @@ namespace Tests
         {
             // Arrange
             var mockupLogger = new Mock<ILogger<OrderRequestHandler>>();
-            var mockupKafkaConnection = new Mock<KafkaConnection>();
+            var kafkaConnection = new KafkaConnection();
 
-            var handler = new OrderRequestHandler(
-                mockupLogger.Object,
-                mockupKafkaConnection.Object
-            );
+            var handler = new OrderRequestHandler(mockupLogger.Object, kafkaConnection);
             var order = new Order
             {
                 Id = Guid.NewGuid(),
