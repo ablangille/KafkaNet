@@ -10,12 +10,12 @@ namespace KafkaDocker.Publisher.Controllers
     public class OrderController : ControllerBase
     {
         private readonly ILogger<OrderController> _logger;
-        private readonly IOrderRequest _handler;
+        private readonly IOrderRequestHandler _handler;
         private readonly IOrderRepository _repository;
 
         public OrderController(
             ILogger<OrderController> logger,
-            IOrderRequest handler,
+            IOrderRequestHandler handler,
             IOrderRepository repository
         )
         {

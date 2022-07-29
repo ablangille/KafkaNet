@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace KafkaDocker.Publisher.Request
 {
-    public class OrderRequestHandler : IOrderRequest
+    public class OrderRequestHandler : IOrderRequestHandler
     {
         private readonly string _bootstrapServers = Environment.GetEnvironmentVariable("BrokerUrl");
         private readonly string _topic = "test";

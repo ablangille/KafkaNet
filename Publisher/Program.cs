@@ -13,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
-builder.Services.AddTransient<IOrderRequest, OrderRequestHandler>();
+builder.Services.AddTransient<IOrderRequestHandler, OrderRequestHandler>();
 builder.Services.AddScoped<KafkaConnection>();
 
 var app = builder.Build();
