@@ -8,9 +8,7 @@ namespace KafkaDocker.Data.Persistence
         public KafkaDockerDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<KafkaDockerDbContext>();
-            optionsBuilder.UseNpgsql(
-                Environment.GetEnvironmentVariable("TestApi_ConnectionString")
-            );
+            optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("ConnectionString"));
 
             return new KafkaDockerDbContext(optionsBuilder.Options);
         }

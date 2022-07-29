@@ -56,7 +56,7 @@ services:
   publisher:
     image: publisher
     environment:
-      TestApi_ConnectionString: ${TestApi_ConnectionString}
+      ConnectionString: ${ConnectionString}
       BrokerUrl: kafka:29092
     build:
       context: .
@@ -67,7 +67,7 @@ services:
   consumer:
     image: consumer
     environment:
-      TestApi_ConnectionString: ${TestApi_ConnectionString}
+      ConnectionString: ${ConnectionString}
       BrokerUrl: kafka:29092
     build:
       context: .

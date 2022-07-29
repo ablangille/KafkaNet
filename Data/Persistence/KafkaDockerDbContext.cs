@@ -6,7 +6,7 @@ namespace KafkaDocker.Data.Persistence
     public class KafkaDockerDbContext : DbContext
     {
         private readonly string _dbConnectionString = Environment.GetEnvironmentVariable(
-            "TestApi_ConnectionString"
+            "ConnectionString"
         );
 
         public KafkaDockerDbContext(DbContextOptions options) : base(options) { }
