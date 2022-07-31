@@ -39,7 +39,10 @@ namespace KafkaDocker.Publisher.Controllers
 
             var response = await _handler.SendOrderRequest(order);
 
-            return StatusCode(response.Status, response.Message != null ? response.Message : order);
+            return StatusCode(
+                response.Status,
+                response.Message is not null ? response.Message : order
+            );
         }
 
         [HttpGet]

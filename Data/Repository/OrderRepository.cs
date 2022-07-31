@@ -50,7 +50,7 @@ namespace KafkaDocker.Data.Repository
             {
                 Order order = context.Orders.Find(id);
 
-                if (order == null)
+                if (order is null)
                 {
                     return null;
                 }
